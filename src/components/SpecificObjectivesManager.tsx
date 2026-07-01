@@ -39,6 +39,7 @@ export default function SpecificObjectivesManager({
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showDeleteConfirmId, setShowDeleteConfirmId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -129,16 +130,7 @@ export default function SpecificObjectivesManager({
   };
 
   const handleDelete = (id: string) => {
-    const objActivities = activities.filter(a => a.specificObjectiveId === id);
-    if (objActivities.length > 0) {
-      if (confirm(`Este objetivo tiene ${objActivities.length} actividades asociadas. ¿Estás seguro de que deseas eliminarlo junto con sus actividades?`)) {
-        onDelete(id);
-      }
-    } else {
-      if (confirm('¿Estás seguro de que deseas eliminar este objetivo específico?')) {
-        onDelete(id);
-      }
-    }
+    setShowDeleteConfirmId(id);
   };
 
   const getPriorityBadgeClass = (priority: Priority) => {
@@ -448,6 +440,54 @@ export default function SpecificObjectivesManager({
           </div>
         </div>
       )}
+
+      {/* CUSTOM CONFIRM DELETE MODAL */}
+      {showDeleteConfirmId && (() => {
+        const objActivities = activities.filter(a => a.specificObjectiveId === showDeleteConfirmId);
+        const hasActivities = objActivities.length > 0;
+        return (
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden animate-scale-up">
+              <div className="p-6 text-center space-y-4">
+                <div className="mx-auto w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center text-rose-600">
+                  <Trash2 className="h-6 w-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-sans font-bold text-base text-slate-900">¿Eliminar objetivo específico?</h3>
+                  {hasActivities ? (
+                    <p className="font-sans text-xs text-rose-600 font-medium leading-relaxed bg-rose-50 p-2.5 rounded-xl border border-rose-100 mt-2">
+                      Este objetivo tiene {objActivities.length} actividades asociadas. Al eliminarlo, también se eliminarán de forma permanente todas sus actividades asociadas.
+                    </p>
+                  ) : (
+                    <p className="font-sans text-xs text-slate-500 leading-relaxed">
+                      Esta acción no se puede deshacer. Se eliminará permanentemente este objetivo del plan estratégico.
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center justify-center space-x-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirmId(null)}
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onDelete(showDeleteConfirmId);
+                      setShowDeleteConfirmId(null);
+                    }}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-rose-600/10"
+                  >
+                    Sí, eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { INITIAL_MARKETING_PLAN } from './data/mockData';
+import { DEFAULT_STRATEGIC_ANALYSIS } from './data/defaultStrategicData';
 import { 
   GeneralObjective, 
   SpecificObjective, 
@@ -7,7 +8,8 @@ import {
   KPI, 
   Alert, 
   MarketingPlanState,
-  PlanStatus
+  PlanStatus,
+  StrategicAnalysisState
 } from './types';
 
 // Import newly created submodules
@@ -21,8 +23,10 @@ import KpiManager from './components/KpiManager';
 import BudgetManager from './components/BudgetManager';
 import StrategicTimeline from './components/StrategicTimeline';
 import ReportsManager from './components/ReportsManager';
+import StrategicAnalysisManager from './components/StrategicAnalysisManager';
 
-const LOCAL_STORAGE_KEY = 'mkt_plan_state_v3';
+
+const LOCAL_STORAGE_KEY = 'mkt_plan_state_v4_pdf';
 
 export default function App() {
   // Navigation states
@@ -34,12 +38,19 @@ export default function App() {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (!parsed.strategicAnalysis) {
+          parsed.strategicAnalysis = DEFAULT_STRATEGIC_ANALYSIS;
+        }
+        return parsed;
       } catch (e) {
         console.error('Error parsing saved state', e);
       }
     }
-    return INITIAL_MARKETING_PLAN;
+    return {
+      ...INITIAL_MARKETING_PLAN,
+      strategicAnalysis: DEFAULT_STRATEGIC_ANALYSIS
+    };
   });
 
   // Save to localStorage on change
@@ -238,6 +249,14 @@ export default function App() {
     }));
   };
 
+  const handleUpdateStrategicAnalysis = (updated: StrategicAnalysisState) => {
+    setState(prev => ({
+      ...prev,
+      strategicAnalysis: updated
+    }));
+  };
+
+
   // Navigation tab component switcher
   const renderActiveTabContent = () => {
     switch (activeTab) {
@@ -315,6 +334,20 @@ export default function App() {
             budgetTotalAnnual={state.budgetTotalAnnual}
           />
         );
+      case 'analisis-estrategico':
+        return (
+          <StrategicAnalysisManager
+            strategicAnalysis={state.strategicAnalysis || DEFAULT_STRATEGIC_ANALYSIS}
+            onUpdateStrategicAnalysis={handleUpdateStrategicAnalysis}
+            onAddObjective={handleAddSpecificObjective}
+            onAddActivity={handleAddActivity}
+            onAddKpi={handleAddKpi}
+            objectives={state.specificObjectives}
+            activities={state.activities}
+            kpis={state.kpis}
+          />
+        );
+
       default:
         return <div className="text-center py-10">Sección en desarrollo...</div>;
     }

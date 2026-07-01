@@ -11,7 +11,8 @@ import {
   Bell, 
   X,
   Menu,
-  Award
+  Award,
+  Compass
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ interface SidebarProps {
 export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, unreadAlertsCount }: SidebarProps) {
   const menuItems = [
     { id: 'resumen', label: 'Resumen Ejecutivo', icon: BarChart3 },
+    { id: 'analisis-estrategico', label: 'Análisis Estratégico', icon: Compass },
     { id: 'objetivo-general', label: 'Objetivo General', icon: Award },
     { id: 'objetivos-especificos', label: 'Objetivos Específicos', icon: Target },
     { id: 'actividades', label: 'Gestión de Actividades', icon: ListTodo },
@@ -33,6 +35,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, un
     { id: 'cronograma', label: 'Cronograma Gantt', icon: Clock },
     { id: 'reportes', label: 'Reportes y Análisis', icon: FileText },
   ];
+
 
   return (
     <>

@@ -42,6 +42,7 @@ export default function KpiManager({
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showDeleteConfirmId, setShowDeleteConfirmId] = useState<string | null>(null);
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -147,13 +148,7 @@ export default function KpiManager({
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este KPI?')) {
-      onDelete(id);
-      if (selectedKpiId === id) {
-        const remaining = kpis.filter(k => k.id !== id);
-        setSelectedKpiId(remaining[0]?.id || '');
-      }
-    }
+    setShowDeleteConfirmId(id);
   };
 
   return (
@@ -203,11 +198,26 @@ export default function KpiManager({
                       Meta: {k.target} {k.unit} • Actual: {k.currentValue}
                     </p>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2.5">
                     <span className={`h-2.5 w-2.5 rounded-full ${sem.color} shadow-sm border border-white/20`} title={sem.label}></span>
                     <span className={`font-mono text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-700'}`}>
                       {compliance}%
                     </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDeleteConfirmId(k.id);
+                      }}
+                      className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ${
+                        isSelected 
+                          ? 'text-blue-100 hover:text-white hover:bg-blue-700' 
+                          : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'
+                      }`}
+                      title="Eliminar KPI"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               );
@@ -230,18 +240,22 @@ export default function KpiManager({
 
                 <div className="flex items-center space-x-2 shrink-0">
                   <button
+                    type="button"
                     onClick={() => handleOpenEdit(selectedKpi)}
-                    className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors flex items-center space-x-1"
                     title="Editar KPI"
                   >
-                    <Edit2 className="h-4 w-4" />
+                    <Edit2 className="h-3.5 w-3.5" />
+                    <span>Editar</span>
                   </button>
                   <button
-                    onClick={() => handleDelete(selectedKpi.id)}
-                    className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                    type="button"
+                    onClick={() => setShowDeleteConfirmId(selectedKpi.id)}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors flex items-center space-x-1"
                     title="Eliminar KPI"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Eliminar</span>
                   </button>
                 </div>
               </div>
@@ -508,6 +522,49 @@ export default function KpiManager({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CUSTOM CONFIRM DELETE MODAL */}
+      {showDeleteConfirmId && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden animate-scale-up">
+            <div className="p-6 text-center space-y-4">
+              <div className="mx-auto w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center text-rose-600">
+                <Trash2 className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-sans font-bold text-base text-slate-900">¿Eliminar este indicador?</h3>
+                <p className="font-sans text-xs text-slate-500 leading-relaxed">
+                  Esta acción no se puede deshacer. Se eliminarán permanentemente el historial y todas las metas asociadas a este indicador.
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirmId(null)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const id = showDeleteConfirmId;
+                    onDelete(id);
+                    if (selectedKpiId === id) {
+                      const remaining = kpis.filter(k => k.id !== id);
+                      setSelectedKpiId(remaining[0]?.id || '');
+                    }
+                    setShowDeleteConfirmId(null);
+                  }}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-rose-600/10"
+                >
+                  Sí, eliminar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

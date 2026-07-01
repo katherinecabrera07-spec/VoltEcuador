@@ -6,8 +6,10 @@ import {
   AlertTriangle, 
   Calendar,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Compass
 } from 'lucide-react';
+
 import { 
   ResponsiveContainer, 
   PieChart, 
@@ -140,6 +142,29 @@ export default function ExecutiveSummary({
             <Layers className="h-6 w-6" />
           </div>
         </div>
+      </div>
+
+      {/* Strategic Callout Banner */}
+      <div className="bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center space-x-4">
+          <div className="bg-blue-600/30 text-blue-300 p-3 rounded-xl border border-blue-500/25">
+            <Compass className="h-6 w-6 animate-spin-slow" />
+          </div>
+          <div>
+            <span className="font-sans text-[10px] font-extrabold text-blue-400 uppercase tracking-widest">SISTEMA DE CONTROL ESTRATÉGICO</span>
+            <h3 className="font-sans font-extrabold text-base text-white mt-0.5">Diagnóstico y Posicionamiento de Negocio</h3>
+            <p className="font-sans text-xs text-slate-300 mt-1">
+              Las matrices estratégicas indican una posición competitiva de liquidación de stock. Acceda para visualizar FODA, EFI, PEYEA y McKinsey.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => onNavigateToTab('analisis-estrategico')}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold font-sans text-xs transition-colors flex items-center space-x-1.5 shrink-0 shadow-lg"
+        >
+          <span>Abrir Análisis Estratégico</span>
+          <ArrowRight className="h-4 w-4" />
+        </button>
       </div>
 
       {/* General Strategy Mission Banner */}
@@ -289,6 +314,8 @@ export default function ExecutiveSummary({
               obj.status === 'Retrasado' ? 'bg-rose-500 border-rose-100 text-rose-700' :
               'bg-slate-400 border-slate-100 text-slate-600';
 
+            const objActivities = activities.filter(a => a.specificObjectiveId === obj.id);
+
             return (
               <div key={obj.id} className="relative group">
                 {/* Visual Circle indicator */}
@@ -313,9 +340,53 @@ export default function ExecutiveSummary({
                     </span>
                   </div>
 
-                  <p className="font-sans text-slate-600 text-xs mb-3">
+                  <p className="font-sans text-slate-600 text-xs mb-4">
                     {obj.strategicReason}
                   </p>
+
+                  {/* Sincronización de Periodos de Actividades */}
+                  {objActivities.length > 0 && (
+                    <div className="mb-4 bg-white/80 rounded-xl p-3.5 border border-slate-200/50 space-y-2.5 shadow-xs">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                        <span className="font-sans text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                          Actividades de Ejecución
+                        </span>
+                        <span className="font-sans text-[9px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                          Cronograma Sincronizado
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {objActivities.map(act => (
+                          <div key={act.id} className="bg-slate-50/70 hover:bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex flex-col justify-between space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="font-sans font-semibold text-xs text-slate-700 leading-snug">
+                                {act.name}
+                              </span>
+                              <span className={`px-1.5 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-wider shrink-0 ${
+                                act.status === 'Completado' ? 'bg-emerald-100 text-emerald-800' :
+                                act.status === 'En progreso' ? 'bg-blue-100 text-blue-800' :
+                                'bg-slate-200 text-slate-700'
+                              }`}>
+                                {act.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-100">
+                              <div className="flex items-center space-x-1 font-mono">
+                                <Calendar className="h-3 w-3 text-slate-400" />
+                                <span>{act.startDate} al {act.endDate}</span>
+                              </div>
+                              <div className="flex items-center space-x-1.5">
+                                <span className={`font-mono font-bold ${getProgressColor(act.progress).text}`}>{act.progress}%</span>
+                                <div className="w-10 bg-slate-200 h-1 rounded-full overflow-hidden">
+                                  <div className={`${getProgressColor(act.progress).bg} h-1`} style={{ width: `${act.progress}%` }}></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-200/50">
                     <div className="flex items-center space-x-6">

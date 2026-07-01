@@ -45,6 +45,7 @@ export default function ActivitiesManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [showDeleteConfirmId, setShowDeleteConfirmId] = useState<string | null>(null);
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -143,9 +144,7 @@ export default function ActivitiesManager({
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('¿Estás seguro de que deseas eliminar esta actividad?')) {
-      onDelete(id);
-    }
+    setShowDeleteConfirmId(id);
   };
 
   // Simulate File Upload (Drag & Drop + Clickable selection)
@@ -818,6 +817,44 @@ export default function ActivitiesManager({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CUSTOM CONFIRM DELETE MODAL */}
+      {showDeleteConfirmId && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden animate-scale-up">
+            <div className="p-6 text-center space-y-4">
+              <div className="mx-auto w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center text-rose-600">
+                <Trash2 className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-sans font-bold text-base text-slate-900">¿Eliminar actividad?</h3>
+                <p className="font-sans text-xs text-slate-500 leading-relaxed">
+                  Esta acción no se puede deshacer. Se eliminarán permanentemente todos los datos, presupuestos y archivos de esta actividad.
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirmId(null)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDelete(showDeleteConfirmId);
+                    setShowDeleteConfirmId(null);
+                  }}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-rose-600/10"
+                >
+                  Sí, eliminar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
